@@ -21,6 +21,12 @@ static void setupPrefs() {
 	customColor = LCPParseColorString([colors objectForKey:@"scrollIndicatorColor"], @"#FFFFFF");
 }
 
+@interface UIScrollView (stuff)
+@property (getter=_verticalScrollIndicator,nonatomic,readonly) UIView * verticalScrollIndicator; 
+@property (getter=_horizontalScrollIndicator,nonatomic,readonly) UIView * horizontalScrollIndicator; 
+@end
+
+%group Tweak13
 %hook _UIScrollViewScrollIndicator 
 -(id)_colorForStyle:(long long)arg1 {
 
@@ -38,9 +44,34 @@ static void setupPrefs() {
 	return [UIColor colorWithRed:red green:green blue:blue alpha:alpha];
 }
 %end
+%end
+
+%group Tweak12
+%hook UIScrollView
+-(void)addSubview:(UIView *)view {
+	%orig;
+	if ([view isMemberOfClass:[UIImageView class]] && CGSizeEqualToSize(view.frame.size, CGSizeMake(2.5, 2.5))) {
+		UIImageView *imgView = (UIImageView *)view;
+		if (retainAlpha) {
+			imgView.image = [imgView.image imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
+			[imgView setTintColor:customColor];
+		} else {
+			imgView.backgroundColor = customColor;
+			imgView.layer.cornerRadius = 1.5;
+			imgView.image = nil;
+		}
+	}
+}
+%end
+%end
 
 %ctor {
 	setupPrefs();
-	if (enabled)
-		%init(_ungrouped);
+	if (enabled) {
+		if (@available(iOS 13, *)) {
+			%init(Tweak13);
+		} else {
+			%init(Tweak12);
+		}
+	}
 }

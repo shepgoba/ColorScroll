@@ -7,7 +7,7 @@ include $(THEOS)/makefiles/common.mk
 
 TWEAK_NAME = ColorScroll
 
-ColorScroll_FILES = Tweak.x
+ColorScroll_FILES = Tweak.xm
 ColorScroll_CFLAGS = -fobjc-arc
 ColorScroll_LIBRARIES = colorpicker
 
